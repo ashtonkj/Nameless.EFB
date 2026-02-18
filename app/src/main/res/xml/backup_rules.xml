@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude Room database (regenerated from nav data) -->
+    <exclude domain="database" path="efb.db" />
+    <exclude domain="database" path="efb.db-shm" />
+    <exclude domain="database" path="efb.db-wal" />
+    <!-- Include flight plans, logbook, aircraft profiles, annotations -->
+    <include domain="sharedpref" path="." />
+    <include domain="file" path="." />
+</full-backup-content>

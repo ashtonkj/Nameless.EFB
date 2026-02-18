@@ -1,0 +1,5 @@
+[package]
+name = "dataref-schema"
+version = "0.1.0"
+edition = "2021"
+description = "Shared dataref struct definitions for the EFB plugin and Kotlin app protocol"

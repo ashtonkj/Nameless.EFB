@@ -1,0 +1,9 @@
+[package]
+name = "nav-data-builder"
+version = "0.1.0"
+edition = "2021"
+description = "CLI tool that parses OurAirports CSV + X-Plane nav data files into the EFB SQLite navigation database"
+
+[[bin]]
+name = "nav-data-builder"
+path = "src/main.rs"

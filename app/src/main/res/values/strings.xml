@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nameless EFB</string>
+    <string name="disclaimer_title">Simulator Use Only</string>
+    <string name="disclaimer_body">This application is a simulator training tool for use with X-Plane 12. It is NOT certified for real-world aviation use and must not be used for actual flight navigation.</string>
+    <string name="disclaimer_acknowledge">I Understand</string>
+</resources>

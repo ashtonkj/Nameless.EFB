@@ -1,0 +1,16 @@
+[package]
+name = "xplane-efb-plugin"
+version = "0.1.0"
+edition = "2021"
+description = "X-Plane 12 plugin that streams sim data to the Nameless EFB Android app"
+
+[lib]
+name = "xplane_efb_plugin"
+crate-type = ["cdylib"]
+
+[dependencies]
+dataref-schema = { path = "../dataref-schema" }
+efb-protocol   = { path = "../efb-protocol" }
+
+[dev-dependencies]
+efb-protocol = { path = "../efb-protocol" }

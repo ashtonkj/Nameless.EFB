@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "xplane-efb-plugin",
+    "dataref-schema",
+    "efb-protocol",
+    "nav-data-builder",
+    "terrain-preprocessor",
+]

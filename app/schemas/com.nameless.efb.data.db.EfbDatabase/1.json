@@ -1,0 +1,1140 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "da9a43a8aa31929a23ef96554c599bfb",
+    "entities": [
+      {
+        "tableName": "airports",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`icao` TEXT NOT NULL, `name` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `elevationFt` INTEGER NOT NULL, `airportType` TEXT NOT NULL, `isTowered` INTEGER NOT NULL, `isMilitary` INTEGER NOT NULL, `countryCode` TEXT NOT NULL, `municipality` TEXT NOT NULL, `source` TEXT NOT NULL, PRIMARY KEY(`icao`))",
+        "fields": [
+          {
+            "fieldPath": "icao",
+            "columnName": "icao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevationFt",
+            "columnName": "elevationFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airportType",
+            "columnName": "airportType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isTowered",
+            "columnName": "isTowered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isMilitary",
+            "columnName": "isMilitary",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countryCode",
+            "columnName": "countryCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "municipality",
+            "columnName": "municipality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "icao"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "runways",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `airportIcao` TEXT NOT NULL, `ident` TEXT NOT NULL, `lengthFt` INTEGER NOT NULL, `widthFt` INTEGER NOT NULL, `surface` TEXT NOT NULL, `latHe` REAL NOT NULL, `lonHe` REAL NOT NULL, `latLe` REAL NOT NULL, `lonLe` REAL NOT NULL, `headingDeg` REAL NOT NULL, `ilsFreqHz` INTEGER NOT NULL, FOREIGN KEY(`airportIcao`) REFERENCES `airports`(`icao`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airportIcao",
+            "columnName": "airportIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ident",
+            "columnName": "ident",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lengthFt",
+            "columnName": "lengthFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "widthFt",
+            "columnName": "widthFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surface",
+            "columnName": "surface",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latHe",
+            "columnName": "latHe",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lonHe",
+            "columnName": "lonHe",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latLe",
+            "columnName": "latLe",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lonLe",
+            "columnName": "lonLe",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "headingDeg",
+            "columnName": "headingDeg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ilsFreqHz",
+            "columnName": "ilsFreqHz",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_runways_airportIcao",
+            "unique": false,
+            "columnNames": [
+              "airportIcao"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_runways_airportIcao` ON `${TABLE_NAME}` (`airportIcao`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "airports",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "airportIcao"
+            ],
+            "referencedColumns": [
+              "icao"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "airport_frequencies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `airportIcao` TEXT NOT NULL, `type` TEXT NOT NULL, `description` TEXT NOT NULL, `frequencyHz` INTEGER NOT NULL, FOREIGN KEY(`airportIcao`) REFERENCES `airports`(`icao`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airportIcao",
+            "columnName": "airportIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequencyHz",
+            "columnName": "frequencyHz",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_airport_frequencies_airportIcao",
+            "unique": false,
+            "columnNames": [
+              "airportIcao"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_airport_frequencies_airportIcao` ON `${TABLE_NAME}` (`airportIcao`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "airports",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "airportIcao"
+            ],
+            "referencedColumns": [
+              "icao"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "navaids",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `identifier` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `elevationFt` INTEGER NOT NULL, `frequencyHz` INTEGER NOT NULL, `magneticVariation` REAL NOT NULL, `rangeNm` INTEGER NOT NULL, `icaoRegion` TEXT NOT NULL, `airportIcao` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevationFt",
+            "columnName": "elevationFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequencyHz",
+            "columnName": "frequencyHz",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "magneticVariation",
+            "columnName": "magneticVariation",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangeNm",
+            "columnName": "rangeNm",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "icaoRegion",
+            "columnName": "icaoRegion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airportIcao",
+            "columnName": "airportIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_navaids_identifier",
+            "unique": false,
+            "columnNames": [
+              "identifier"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_navaids_identifier` ON `${TABLE_NAME}` (`identifier`)"
+          },
+          {
+            "name": "index_navaids_icaoRegion",
+            "unique": false,
+            "columnNames": [
+              "icaoRegion"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_navaids_icaoRegion` ON `${TABLE_NAME}` (`icaoRegion`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "fixes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `identifier` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `icaoRegion` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "icaoRegion",
+            "columnName": "icaoRegion",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_fixes_identifier",
+            "unique": false,
+            "columnNames": [
+              "identifier"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fixes_identifier` ON `${TABLE_NAME}` (`identifier`)"
+          },
+          {
+            "name": "index_fixes_icaoRegion",
+            "unique": false,
+            "columnNames": [
+              "icaoRegion"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fixes_icaoRegion` ON `${TABLE_NAME}` (`icaoRegion`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "airways",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `identifier` TEXT NOT NULL, `type` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_airways_identifier",
+            "unique": false,
+            "columnNames": [
+              "identifier"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_airways_identifier` ON `${TABLE_NAME}` (`identifier`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "airway_segments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `airwayId` INTEGER NOT NULL, `fixFromId` INTEGER NOT NULL, `fixToId` INTEGER NOT NULL, `level` TEXT NOT NULL, `direction` TEXT NOT NULL, `minAltFt` INTEGER NOT NULL, `maxAltFt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airwayId",
+            "columnName": "airwayId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fixFromId",
+            "columnName": "fixFromId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fixToId",
+            "columnName": "fixToId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "direction",
+            "columnName": "direction",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minAltFt",
+            "columnName": "minAltFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxAltFt",
+            "columnName": "maxAltFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_airway_segments_airwayId",
+            "unique": false,
+            "columnNames": [
+              "airwayId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_airway_segments_airwayId` ON `${TABLE_NAME}` (`airwayId`)"
+          },
+          {
+            "name": "index_airway_segments_fixFromId",
+            "unique": false,
+            "columnNames": [
+              "fixFromId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_airway_segments_fixFromId` ON `${TABLE_NAME}` (`fixFromId`)"
+          },
+          {
+            "name": "index_airway_segments_fixToId",
+            "unique": false,
+            "columnNames": [
+              "fixToId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_airway_segments_fixToId` ON `${TABLE_NAME}` (`fixToId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "airspaces",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `airspaceClass` TEXT NOT NULL, `floorFt` INTEGER NOT NULL, `ceilingFt` INTEGER NOT NULL, `floorRef` TEXT NOT NULL, `ceilingRef` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `geometryJson` TEXT NOT NULL, `bboxLatMin` REAL NOT NULL, `bboxLatMax` REAL NOT NULL, `bboxLonMin` REAL NOT NULL, `bboxLonMax` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airspaceClass",
+            "columnName": "airspaceClass",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floorFt",
+            "columnName": "floorFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ceilingFt",
+            "columnName": "ceilingFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floorRef",
+            "columnName": "floorRef",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ceilingRef",
+            "columnName": "ceilingRef",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countryCode",
+            "columnName": "countryCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "geometryJson",
+            "columnName": "geometryJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bboxLatMin",
+            "columnName": "bboxLatMin",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bboxLatMax",
+            "columnName": "bboxLatMax",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bboxLonMin",
+            "columnName": "bboxLonMin",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bboxLonMax",
+            "columnName": "bboxLonMax",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "obstacles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `heightAglFt` INTEGER NOT NULL, `elevationMslFt` INTEGER NOT NULL, `source` TEXT NOT NULL, `countryCode` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heightAglFt",
+            "columnName": "heightAglFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevationMslFt",
+            "columnName": "elevationMslFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countryCode",
+            "columnName": "countryCode",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "flight_plans",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `departureIcao` TEXT NOT NULL, `destinationIcao` TEXT NOT NULL, `aircraftProfileId` INTEGER, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `waypointsJson` TEXT NOT NULL, `notes` TEXT NOT NULL, `tags` TEXT NOT NULL, `cruiseAltitudeFt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "departureIcao",
+            "columnName": "departureIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destinationIcao",
+            "columnName": "destinationIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aircraftProfileId",
+            "columnName": "aircraftProfileId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "waypointsJson",
+            "columnName": "waypointsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cruiseAltitudeFt",
+            "columnName": "cruiseAltitudeFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "flight_plan_waypoints",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `flightPlanId` INTEGER NOT NULL, `sequence` INTEGER NOT NULL, `waypointType` TEXT NOT NULL, `identifier` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitudeConstraintFt` INTEGER, `speedConstraintKt` INTEGER, `airway` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightPlanId",
+            "columnName": "flightPlanId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sequence",
+            "columnName": "sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "waypointType",
+            "columnName": "waypointType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "altitudeConstraintFt",
+            "columnName": "altitudeConstraintFt",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "speedConstraintKt",
+            "columnName": "speedConstraintKt",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "airway",
+            "columnName": "airway",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "aircraft_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `registration` TEXT NOT NULL, `profileJson` TEXT NOT NULL, `isBuiltIn` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileJson",
+            "columnName": "profileJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBuiltIn",
+            "columnName": "isBuiltIn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "logbook_entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` INTEGER NOT NULL, `departureIcao` TEXT NOT NULL, `arrivalIcao` TEXT NOT NULL, `aircraftType` TEXT NOT NULL, `registration` TEXT NOT NULL, `blockTimeSec` INTEGER NOT NULL, `flightTimeSec` INTEGER NOT NULL, `distanceNm` REAL NOT NULL, `maxAltitudeFt` INTEGER NOT NULL, `notes` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "departureIcao",
+            "columnName": "departureIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivalIcao",
+            "columnName": "arrivalIcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aircraftType",
+            "columnName": "aircraftType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registration",
+            "columnName": "registration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blockTimeSec",
+            "columnName": "blockTimeSec",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightTimeSec",
+            "columnName": "flightTimeSec",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceNm",
+            "columnName": "distanceNm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxAltitudeFt",
+            "columnName": "maxAltitudeFt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "metar_cache",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`icao` TEXT NOT NULL, `rawMetar` TEXT NOT NULL, `flightCategory` TEXT NOT NULL, `fetchedAt` INTEGER NOT NULL, `windDirDeg` INTEGER NOT NULL, `windSpeedKt` INTEGER NOT NULL, `visibilityM` INTEGER NOT NULL, `ceilingFt` INTEGER, `tempC` REAL NOT NULL, `dewpointC` REAL NOT NULL, `qnhHpa` REAL NOT NULL, PRIMARY KEY(`icao`))",
+        "fields": [
+          {
+            "fieldPath": "icao",
+            "columnName": "icao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawMetar",
+            "columnName": "rawMetar",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightCategory",
+            "columnName": "flightCategory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "windDirDeg",
+            "columnName": "windDirDeg",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "windSpeedKt",
+            "columnName": "windSpeedKt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visibilityM",
+            "columnName": "visibilityM",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ceilingFt",
+            "columnName": "ceilingFt",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tempC",
+            "columnName": "tempC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dewpointC",
+            "columnName": "dewpointC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qnhHpa",
+            "columnName": "qnhHpa",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "icao"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "plate_annotations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `plateId` TEXT NOT NULL, `annotationsJson` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plateId",
+            "columnName": "plateId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "annotationsJson",
+            "columnName": "annotationsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_plate_annotations_plateId",
+            "unique": false,
+            "columnNames": [
+              "plateId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_plate_annotations_plateId` ON `${TABLE_NAME}` (`plateId`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'da9a43a8aa31929a23ef96554c599bfb')"
+    ]
+  }
+}

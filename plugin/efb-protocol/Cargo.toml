@@ -1,0 +1,8 @@
+[package]
+name = "efb-protocol"
+version = "0.1.0"
+edition = "2021"
+description = "UDP packet codec shared between the X-Plane plugin and the Android EFB app"
+
+[dependencies]
+dataref-schema = { path = "../dataref-schema" }

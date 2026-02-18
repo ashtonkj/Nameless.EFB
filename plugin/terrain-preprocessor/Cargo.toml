@@ -1,0 +1,9 @@
+[package]
+name = "terrain-preprocessor"
+version = "0.1.0"
+edition = "2021"
+description = "CLI tool that converts Copernicus DEM HGT files to the EFB internal 512x512 float16 tile format"
+
+[[bin]]
+name = "terrain-preprocessor"
+path = "src/main.rs"
