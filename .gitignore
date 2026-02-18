@@ -25,3 +25,61 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+
+# API keys & credentials
+openaip.key
+navigraph.credentials
+*.key
+*.keystore
+!debug.keystore
+
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android
+*.apk
+*.aab
+*.dex
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Rust / Cargo
+target/
+Cargo.lock
+
+# X-Plane plugin binaries
+*.xpl
+
+# GLSL compiled artifacts (shaders loaded from .glsl assets — no compiled form needed)
+*.spv
+
+# Generated navigation database (built at build time by Rust CLI from source data)
+*.db
+*.sqlite
+*.sqlite3
+nav_data/
+
+# Large binary data files (downloaded separately, not versioned)
+# Copernicus DEM terrain tiles
+terrain_tiles/
+*.hgt
+
+# MBTiles offline map data
+*.mbtiles
+
+# Navigraph AIRAC data (subscription, imported by user)
+airac/
+navigraph/
+
+# OpenAIP bulk data downloads
+openapi_data/
+
+# macOS
+.DS_Store
