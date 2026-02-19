@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    id("jacoco")
 }
 
 android {
@@ -60,9 +61,41 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.useJUnitPlatform()
+                it.configure<JacocoTaskExtension> {
+                    isEnabled = true
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }
+}
+
+tasks.register<JacocoReport>("jacocoUnitTestReport") {
+    dependsOn("testDebugUnitTest")
+    reports {
+        xml.required.set(true)
+        html.required.set(false)
+    }
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.get()) {
+            include(
+                "tmp/kotlin-classes/debug/**/*.class",
+                "intermediates/javac/debug/**/*.class",
+            )
+            exclude(
+                "**/R.class", "**/R\$*.class", "**/BuildConfig.*",
+                "**/Manifest*.*", "**/*Test*.*", "android/**/*.*",
+                "**/*_Impl.class", "**/*_Impl\$*.class",
+            )
+        }
+    )
+    executionData.setFrom(
+        fileTree(layout.buildDirectory.get()) {
+            include("jacoco/testDebugUnitTest.exec")
+        }
+    )
 }
 
 dependencies {

@@ -11,6 +11,9 @@ jobs:
   android:
     name: Android build & unit tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
 
     steps:
       - uses: actions/checkout@v4
@@ -35,13 +38,31 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Run JVM unit tests
-        run: ./gradlew test --no-daemon --stacktrace
+      - name: Run JVM unit tests with coverage
+        run: ./gradlew testDebugUnitTest jacocoUnitTestReport --no-daemon --stacktrace
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Android Unit Tests
+          path: app/build/test-results/testDebugUnitTest/*.xml
+          reporter: java-junit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kotlin-coverage
+          path: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
 
   # ── Rust ────────────────────────────────────────────────────────────────────
   rust:
     name: Rust build & tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
 
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +71,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-gnu
+          components: llvm-tools-preview
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -60,9 +82,29 @@ jobs:
             plugin/target
           key: cargo-${{ hashFiles('plugin/**/Cargo.toml', 'plugin/**/Cargo.lock') }}
 
-      - name: Cargo test (workspace)
+      - name: Install cargo-nextest and cargo-llvm-cov
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest,cargo-llvm-cov
+
+      - name: Cargo test with coverage
         working-directory: plugin
-        run: cargo test --workspace
+        run: cargo llvm-cov nextest --workspace --lcov --output-path lcov.info --profile ci
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Rust Unit Tests
+          path: plugin/target/nextest/ci/junit.xml
+          reporter: java-junit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rust-coverage
+          path: plugin/lcov.info
 
       - name: Cargo build linux target
         working-directory: plugin
