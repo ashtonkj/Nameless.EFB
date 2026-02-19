@@ -1,5 +1,8 @@
 package com.nameless.efb.domain.gauge
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
 /**
  * Aircraft-specific gauge limits and V-speeds used to configure arc geometry
  * and alert thresholds across the steam gauge panel.
@@ -9,6 +12,7 @@ package com.nameless.efb.domain.gauge
  *
  * Default values match a typical Cessna C172S (Lycoming IO-360).
  */
+@Serializable
 data class AircraftProfile(
     val type: String = "C172",
     val fuelType: FuelType = FuelType.AVGAS,
@@ -33,4 +37,12 @@ data class AircraftProfile(
     // ── Electrical / pneumatic limits ─────────────────────────────────────────
     val busVoltsMin: Float = 13.0f,
     val suctionMinInhg: Float = 4.5f,
-)
+) {
+    companion object {
+        private val json = Json { ignoreUnknownKeys = true }
+
+        /** Deserialise an [AircraftProfile] from a JSON string. */
+        fun fromJson(jsonString: String): AircraftProfile =
+            json.decodeFromString(jsonString)
+    }
+}

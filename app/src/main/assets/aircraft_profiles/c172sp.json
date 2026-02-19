@@ -1,0 +1,19 @@
+{
+  "type": "C172SP",
+  "fuelType": "AVGAS",
+  "vsoKts": 40.0,
+  "vfeKts": 85.0,
+  "vs1Kts": 48.0,
+  "vnoKts": 127.0,
+  "vneKts": 163.0,
+  "vrKts": 55.0,
+  "vxKts": 59.0,
+  "vyKts": 74.0,
+  "vappKts": 65.0,
+  "hasManifoldPressure": false,
+  "maxRpm": 2700.0,
+  "oilTempRedlineDegC": 118.0,
+  "oilPressMinPsi": 25.0,
+  "busVoltsMin": 13.0,
+  "suctionMinInhg": 4.5
+}

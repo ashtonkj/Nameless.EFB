@@ -1,6 +1,9 @@
 package com.nameless.efb.domain.gauge
 
+import kotlinx.serialization.Serializable
+
 /** Fuel type determines density for flow and quantity conversions. */
+@Serializable
 enum class FuelType {
     /** AVGAS 100LL — density 0.72 kg/L */
     AVGAS,

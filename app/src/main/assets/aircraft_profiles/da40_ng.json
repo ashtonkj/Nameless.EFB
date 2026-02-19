@@ -1,0 +1,19 @@
+{
+  "type": "DA40-NG",
+  "fuelType": "JET_A1",
+  "vsoKts": 52.0,
+  "vfeKts": 99.0,
+  "vs1Kts": 57.0,
+  "vnoKts": 148.0,
+  "vneKts": 178.0,
+  "vrKts": 67.0,
+  "vxKts": 73.0,
+  "vyKts": 88.0,
+  "vappKts": 73.0,
+  "hasManifoldPressure": false,
+  "maxRpm": 2300.0,
+  "oilTempRedlineDegC": 140.0,
+  "oilPressMinPsi": 20.0,
+  "busVoltsMin": 13.0,
+  "suctionMinInhg": 4.5
+}

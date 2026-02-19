@@ -1,0 +1,19 @@
+{
+  "type": "BE58",
+  "fuelType": "AVGAS",
+  "vsoKts": 78.0,
+  "vfeKts": 152.0,
+  "vs1Kts": 85.0,
+  "vnoKts": 195.0,
+  "vneKts": 223.0,
+  "vrKts": 90.0,
+  "vxKts": 97.0,
+  "vyKts": 107.0,
+  "vappKts": 100.0,
+  "hasManifoldPressure": true,
+  "maxRpm": 2700.0,
+  "oilTempRedlineDegC": 118.0,
+  "oilPressMinPsi": 10.0,
+  "busVoltsMin": 13.0,
+  "suctionMinInhg": 4.5
+}

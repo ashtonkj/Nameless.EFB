@@ -1,0 +1,19 @@
+{
+  "type": "PA28-161",
+  "fuelType": "AVGAS",
+  "vsoKts": 44.0,
+  "vfeKts": 103.0,
+  "vs1Kts": 50.0,
+  "vnoKts": 125.0,
+  "vneKts": 160.0,
+  "vrKts": 60.0,
+  "vxKts": 63.0,
+  "vyKts": 79.0,
+  "vappKts": 76.0,
+  "hasManifoldPressure": false,
+  "maxRpm": 2700.0,
+  "oilTempRedlineDegC": 118.0,
+  "oilPressMinPsi": 25.0,
+  "busVoltsMin": 13.0,
+  "suctionMinInhg": 4.5
+}
