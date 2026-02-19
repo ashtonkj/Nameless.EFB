@@ -1,0 +1,10 @@
+# Linker flags for X-Plane plugin targets.
+#
+# X-Plane resolves the XPLM* symbols at runtime when it loads the .xpl shared
+# library, so undefined symbols in the .so/.dll are expected and must be allowed.
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "link-arg=-Wl,--allow-shlib-undefined"]
+
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "link-arg=-Wl,--allow-shlib-undefined"]

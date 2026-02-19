@@ -6,11 +6,17 @@ description = "X-Plane 12 plugin that streams sim data to the Nameless EFB Andro
 
 [lib]
 name = "xplane_efb_plugin"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+mock_xplm = []   # enables MockXplm; automatically active in tests
 
 [dependencies]
 dataref-schema = { path = "../dataref-schema" }
 efb-protocol   = { path = "../efb-protocol" }
+serde          = { version = "1", features = ["derive"] }
+serde_json     = "1"
 
 [dev-dependencies]
 efb-protocol = { path = "../efb-protocol" }
