@@ -12,9 +12,12 @@ import com.nameless.efb.rendering.gl.GlBuffer
 import com.nameless.efb.rendering.gl.GlVao
 import com.nameless.efb.rendering.gl.Theme
 import com.nameless.efb.rendering.gl.buildQuad
+import com.nameless.efb.rendering.gauge.GlViewport
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.ceil
+import kotlin.math.log2
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * OpenGL ES 3.0 renderer for the moving map display (MM-01, MM-02, MM-03).
@@ -288,6 +291,45 @@ class MapRenderer(
             android.opengl.Matrix.rotateM(m, 0, rotDeg, 0f, 0f, 1f)
         }
         return m
+    }
+
+    /**
+     * Renders the map into a sub-viewport for use as the G1000 PFD inset map (G-07).
+     *
+     * Temporarily overrides [centerLat]/[centerLon]/[zoomLevel] and the tracked
+     * screen dimensions, then restores them.  Must be called on the GL thread
+     * with the inset [viewport] already active.
+     *
+     * @param snapshot  Latest sim state — position used as map centre.
+     * @param rangeNm   Desired visible half-range in nm.
+     * @param viewport  The GL sub-viewport that was set by the caller.
+     */
+    fun drawInset(snapshot: SimSnapshot, rangeNm: Float, viewport: GlViewport) {
+        val savedLat  = centerLat
+        val savedLon  = centerLon
+        val savedZoom = zoomLevel
+        val savedW    = screenWidth
+        val savedH    = screenHeight
+
+        centerLat    = snapshot.latitude
+        centerLon    = snapshot.longitude
+        zoomLevel    = rangeToZoom(rangeNm)
+        screenWidth  = viewport.width
+        screenHeight = viewport.height
+
+        drawFrame()
+
+        centerLat    = savedLat
+        centerLon    = savedLon
+        zoomLevel    = savedZoom
+        screenWidth  = savedW
+        screenHeight = savedH
+    }
+
+    /** Approximates the OSM zoom level that shows roughly [rangeNm] of coverage. */
+    private fun rangeToZoom(rangeNm: Float): Int {
+        val nm = rangeNm.coerceIn(1f, 20f)
+        return (14.0 - log2(nm.toDouble())).roundToInt().coerceIn(MIN_ZOOM, MAX_ZOOM)
     }
 
     private fun drawTile(tile: TileXYZ, texId: Int, viewMatrix: FloatArray) {
