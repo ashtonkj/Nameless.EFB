@@ -4,13 +4,13 @@
 in  vec2  a_position;    // local-space vertex (unit quad)
 in  vec2  a_texcoord;
 
-uniform float u_needle_angle; // current value mapped to degrees (via CPU)
+uniform float u_needle_angle; // pre-computed rotation in radians (from needleAngle())
 uniform vec2  u_pivot;        // pivot point in NDC
 
 out vec2 v_texcoord;
 
 void main() {
-    float rad  = radians(u_needle_angle);
+    float rad  = u_needle_angle;
     float cosA = cos(rad);
     float sinA = sin(rad);
 
