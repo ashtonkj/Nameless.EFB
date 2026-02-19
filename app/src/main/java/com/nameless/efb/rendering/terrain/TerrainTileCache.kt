@@ -52,6 +52,17 @@ class TerrainTileCache(private val tileDir: File) {
         return top * (1 - fy) + bot * fy
     }
 
+    // ----- public tile access -----
+
+    /**
+     * Returns the raw 512×512 float16 elevation grid for the 1°×1° tile
+     * whose south-west corner is at ([lat], [lon]) degrees.
+     *
+     * Used by [com.nameless.efb.rendering.map.overlay.TawsRenderer] to upload
+     * the grid as a GL texture.  Returns null if the tile file is not cached.
+     */
+    fun getTileGrid(lat: Int, lon: Int): ShortArray? = getElevationGrid(TileKey(lat, lon))
+
     // ----- private helpers -----
 
     private fun getElevationGrid(key: TileKey): ShortArray? {
