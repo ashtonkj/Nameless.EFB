@@ -78,6 +78,11 @@ Specific OpenGL requirements:
 - Performance target: **60fps sustained**, max **4ms per frame** on render thread.
 - Fallback gracefully to OpenGL ES 2.0 if ES 3.0 is unavailable (no crash).
 
+**EGL and shader implementation notes:**
+- `GLSurfaceView.EGLContextFactory` uses the old `javax.microedition.khronos.egl` (EGL10) API, not `android.opengl.EGL14`. Use the raw constant `0x3098` for `EGL_CONTEXT_CLIENT_VERSION` — EGL10 does not define it.
+- `ShaderManager` injects `assets/shaders/common/common_uniforms.glsl` immediately after the `#version` line of every shader. Individual shaders must **not** redeclare `u_mvp`, `u_theme`, or `u_time_sec`. The common file itself has no `#version` line.
+- Kotlin `object` declarations (singletons) do not support `companion object` — put constants directly in the object body with `private const val`.
+
 ### X-Plane Plugin (Rust)
 
 The plugin is a `cdylib` compiled against XPLM 4.x (X-Plane 12). It replaces XPlaneConnect as the primary data channel.
@@ -98,6 +103,11 @@ The plugin is a `cdylib` compiled against XPLM 4.x (X-Plane 12). It replaces XPl
 - Distributed as `.xpl` in `X-Plane 12/Resources/plugins/EFB/`
 
 **Cross-compilation targets:** `x86_64-unknown-linux-gnu` and `x86_64-pc-windows-gnu`.
+
+**Build and test conventions:**
+- `xplane-efb-plugin` must use `crate-type = ["cdylib", "rlib"]` — the `rlib` is required for `cargo test` to link the crate; `cdylib` alone makes the crate untestable.
+- All XPLM `extern "C"` declarations, `RealXplm`, and the XPLM entry points (`XPluginStart` etc.) must be gated with `#[cfg(not(test))]`. This keeps test binaries free of unresolved XPLM symbols without needing a stub library.
+- `plugin/.cargo/config.toml` adds `-Wl,--allow-shlib-undefined` for Linux/Windows targets so the linker accepts XPLM symbols that X-Plane provides at runtime.
 
 ### Connectivity Architecture
 

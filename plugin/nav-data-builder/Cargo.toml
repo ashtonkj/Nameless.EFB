@@ -7,3 +7,10 @@ description = "CLI tool that parses OurAirports CSV + X-Plane nav data files int
 [[bin]]
 name = "nav-data-builder"
 path = "src/main.rs"
+
+[dependencies]
+anyhow    = "1"
+clap      = { version = "4", features = ["derive"] }
+csv       = "1"
+quick-xml = "0.36"
+rusqlite  = { version = "0.31", features = ["bundled"] }

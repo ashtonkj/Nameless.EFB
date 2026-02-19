@@ -7,3 +7,8 @@ description = "CLI tool that converts Copernicus DEM HGT files to the EFB intern
 [[bin]]
 name = "terrain-preprocessor"
 path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap   = { version = "4", features = ["derive"] }
+half   = "2"
