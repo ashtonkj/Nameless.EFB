@@ -12,6 +12,8 @@
 
 # Package Files #
 *.jar
+# Gradle wrapper JAR must be committed so CI can bootstrap without network access
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
