@@ -24,6 +24,10 @@ class PluginReceiver(
     /** Epoch millis of the most recently received valid packet; 0 if none. */
     @Volatile var lastPacketTime: Long = 0L
 
+    /** Last known plugin source address for command replies. */
+    @Volatile private var pluginAddress: InetAddress? = null
+    @Volatile private var pluginPort: Int = 49101
+
     private var socket: DatagramSocket? = null
     private var job: Job? = null
 
@@ -38,6 +42,7 @@ class PluginReceiver(
                     sock.receive(packet)
                     val snapshot = EfbProtocol.decode(packet.data, packet.length) ?: continue
                     lastPacketTime = System.currentTimeMillis()
+                    pluginAddress = packet.address
                     onSnapshot(snapshot)
                     sendAck(sock, packet.address, packet.port)
                 }
@@ -51,6 +56,24 @@ class PluginReceiver(
         job?.cancel()
         socket?.close()
         socket = null
+    }
+
+    /**
+     * Sends a JSON command to the X-Plane plugin.
+     *
+     * No-op if no plugin packet has been received yet (address unknown).
+     * Uses a short-lived socket so the receive socket is not interrupted.
+     */
+    fun sendCommand(json: String) {
+        val addr = pluginAddress ?: return
+        try {
+            val bytes = json.toByteArray(Charsets.UTF_8)
+            DatagramSocket().use { cmdSock ->
+                cmdSock.send(DatagramPacket(bytes, bytes.size, addr, pluginPort))
+            }
+        } catch (_: Exception) {
+            // Best-effort delivery — plugin will re-sync on next ACK cycle.
+        }
     }
 
     private fun sendAck(sock: DatagramSocket, addr: InetAddress, replyPort: Int) {

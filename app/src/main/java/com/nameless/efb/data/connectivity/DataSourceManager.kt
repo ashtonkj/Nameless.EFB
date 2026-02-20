@@ -24,7 +24,7 @@ class DataSourceManager(
     private val scope: CoroutineScope,
     @Suppress("UNUSED_PARAMETER") private val prefs: DataStore<Preferences>,
     private val timeSource: () -> Long = { System.currentTimeMillis() },
-) {
+) : CommandSink {
     private val _simData = MutableStateFlow<SimSnapshot?>(null)
     val simData: StateFlow<SimSnapshot?> = _simData.asStateFlow()
 
@@ -63,6 +63,16 @@ class DataSourceManager(
         gdl90Receiver.start()
         udpReceiver.start()
         healthJob = scope.launch { monitorSourceHealth() }
+    }
+
+    /**
+     * Sends a JSON command to the X-Plane plugin over the plugin UDP channel.
+     *
+     * The datagram is sent to the last known plugin address (populated once
+     * the first data packet is received from X-Plane).  Safe to call from any thread.
+     */
+    override fun sendCommand(json: String) {
+        pluginReceiver.sendCommand(json)
     }
 
     fun stop() {
