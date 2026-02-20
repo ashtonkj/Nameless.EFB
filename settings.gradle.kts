@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Nameless.EFB"
 include(":app")
+include(":visual-tests")

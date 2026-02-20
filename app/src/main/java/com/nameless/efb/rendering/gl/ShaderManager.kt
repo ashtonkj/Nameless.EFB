@@ -98,6 +98,24 @@ class ShaderManager(private val assets: AssetManager) {
             GLES30.glDeleteProgram(program)
             error("Program link error:\n$infoLog")
         }
+        // GLES initialises all uniforms to 0 — a zero mat4 collapses all geometry.
+        // Pre-set u_mvp to the identity so shaders that pass NDC coordinates
+        // directly render correctly without explicit per-frame MVP uploads.
+        val mvpLoc = GLES30.glGetUniformLocation(program, "u_mvp")
+        if (mvpLoc >= 0) {
+            GLES30.glUseProgram(program)
+            GLES30.glUniformMatrix4fv(mvpLoc, 1, false, IDENTITY_4X4, 0)
+        }
         return program
+    }
+
+    companion object {
+        // Column-major identity matrix (OpenGL convention).
+        private val IDENTITY_4X4 = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f,
+        )
     }
 }
