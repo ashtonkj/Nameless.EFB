@@ -88,3 +88,4 @@ visual-tests/output/*.png
 
 # macOS
 .DS_Store
+docs/reference
