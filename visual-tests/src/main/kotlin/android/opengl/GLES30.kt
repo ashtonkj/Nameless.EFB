@@ -114,6 +114,7 @@ object GLES30 {
     val GL_FRAMEBUFFER_COMPLETE   get() = LGL.GL_FRAMEBUFFER_COMPLETE
 
     val GL_MAX_TEXTURE_SIZE       get() = LGL.GL_MAX_TEXTURE_SIZE
+    val GL_VIEWPORT               get() = 0x0BA2  // OpenGL ES 2.0+ constant
 
     // ── Buffer objects ────────────────────────────────────────────────────────
 

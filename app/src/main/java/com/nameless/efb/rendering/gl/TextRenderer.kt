@@ -53,23 +53,32 @@ class TextRenderer(
     /**
      * Draw [text] at clip-space position ([x], [y]) with the given [scale] and [color].
      *
-     * [x] is the left edge; [y] is the baseline.  Scale 1.0 = one glyph cell
-     * spans 2/[glyphSizePx] in clip space (i.e. roughly the atlas cell size
-     * mapped to NDC).
+     * [scale] is the clip-space height of one character cell.  The width is
+     * aspect-corrected using the current GL viewport so characters appear
+     * square on screen.  Advance between characters is 60 % of the cell width
+     * (monospace spacing).
      *
      * @param text   ASCII string to render (chars 32–126)
      * @param x      left edge in clip space
-     * @param y      baseline in clip space
-     * @param scale  size multiplier (1.0 = default)
+     * @param y      bottom edge in clip space
+     * @param scale  character height in clip-space units (e.g. 0.1 = 5 % of viewport height)
      * @param color  RGBA float array (length 4)
      */
     fun drawText(text: String, x: Float, y: Float, scale: Float, color: FloatArray) {
         if (text.isEmpty()) return
 
-        val cellW = scale * 2f / glyphSizePx   // clip-space width per glyph
-        val cellH = scale * 2f / glyphSizePx   // clip-space height per glyph
-        // Monospace advance: each glyph advances by cellW * 0.6 (narrower than cell)
-        val advance = cellW * glyphSizePx * 0.6f
+        // Query current GL viewport for aspect ratio correction.
+        val vpBuf = IntArray(4)
+        GLES30.glGetIntegerv(GLES30.GL_VIEWPORT, vpBuf, 0)
+        val vpW = vpBuf[2].coerceAtLeast(1)
+        val vpH = vpBuf[3].coerceAtLeast(1)
+        val aspect = vpW.toFloat() / vpH.toFloat()
+
+        // scale = clip-space height of one character cell.
+        // Aspect-correct width so characters appear square on screen.
+        val charH = scale
+        val charW = scale / aspect
+        val advance = charW * 0.6f
 
         // Build triangle geometry: 6 vertices per character (2 triangles).
         val verts = FloatArray(text.length * 6 * 4)  // 6 verts * 4 floats each
@@ -80,9 +89,9 @@ class TextRenderer(
             val uv = fontAtlas.glyphUvMap[ch] ?: fontAtlas.glyphUvMap[' '] ?: continue
 
             val x0 = cursorX
-            val x1 = cursorX + cellW * glyphSizePx
+            val x1 = cursorX + charW
             val y0 = y
-            val y1 = y + cellH * glyphSizePx
+            val y1 = y + charH
 
             // Triangle 1: bottom-left, bottom-right, top-left
             verts[idx++] = x0; verts[idx++] = y0; verts[idx++] = uv.left;  verts[idx++] = uv.bottom

@@ -181,7 +181,7 @@ class SteamGaugePanelRenderer(
         val angle = needleAngle(state.airspeedKts, 0f, 200f, -150f, 150f)
         drawNeedle(angle)
         // Digital readout at bottom.
-        textRenderer.drawText("%.0f".format(state.airspeedKts), -0.35f, -0.75f, 0.65f, whiteColor)
+        textRenderer.drawText("%.0f".format(state.airspeedKts), -0.10f, -0.88f, 0.14f, whiteColor)
     }
 
     private fun drawAi(state: GaugeState, lay: GaugePanelLayout) {
@@ -203,7 +203,7 @@ class SteamGaugePanelRenderer(
         drawNeedle(angle1000)
         drawNeedle(angle10k)
         // Altitude readout.
-        textRenderer.drawText("%.0f".format(state.altFt), -0.5f, -0.75f, 0.55f, whiteColor)
+        textRenderer.drawText("%.0f".format(state.altFt), -0.15f, -0.88f, 0.14f, whiteColor)
     }
 
     private fun drawTc(state: GaugeState, lay: GaugePanelLayout) {
@@ -244,7 +244,7 @@ class SteamGaugePanelRenderer(
         drawFilledQuad(-0.04f, 0.78f, 0.08f, 0.10f)
 
         // Heading digital readout.
-        textRenderer.drawText("%03.0f".format(state.headingDeg), -0.3f, -0.75f, 0.65f, whiteColor)
+        textRenderer.drawText("%03.0f".format(state.headingDeg), -0.10f, -0.88f, 0.14f, whiteColor)
     }
 
     private fun drawVsi(state: GaugeState, lay: GaugePanelLayout) {
@@ -254,7 +254,7 @@ class SteamGaugePanelRenderer(
         drawNeedle(angle)
         // VSI readout.
         val sign = if (state.displayedVsiFpm >= 0) "+" else ""
-        textRenderer.drawText("$sign%.0f".format(state.displayedVsiFpm), -0.5f, -0.75f, 0.5f, whiteColor)
+        textRenderer.drawText("$sign%.0f".format(state.displayedVsiFpm), -0.15f, -0.88f, 0.13f, whiteColor)
     }
 
     private fun drawRpm(state: GaugeState, lay: GaugePanelLayout) {
@@ -262,7 +262,7 @@ class SteamGaugePanelRenderer(
         drawDialFace(GaugeType.RPM)
         val angle = needleAngle(state.rpmEng0, 0f, 3000f, -150f, 150f)
         drawNeedle(angle)
-        textRenderer.drawText("%.0f".format(state.rpmEng0), -0.4f, -0.75f, 0.55f, whiteColor)
+        textRenderer.drawText("%.0f".format(state.rpmEng0), -0.15f, -0.85f, 0.18f, whiteColor)
     }
 
     private fun drawMap(state: GaugeState, lay: GaugePanelLayout) {
@@ -270,7 +270,7 @@ class SteamGaugePanelRenderer(
         drawDialFace(GaugeType.MANIFOLD_PRESSURE)
         val angle = needleAngle(state.mapInhg, 10f, 35f, -150f, 150f)
         drawNeedle(angle)
-        textRenderer.drawText("%.1f".format(state.mapInhg), -0.4f, -0.75f, 0.55f, whiteColor)
+        textRenderer.drawText("%.1f".format(state.mapInhg), -0.15f, -0.85f, 0.18f, whiteColor)
     }
 
     private fun drawOil(state: GaugeState, lay: GaugePanelLayout) {
@@ -293,7 +293,7 @@ class SteamGaugePanelRenderer(
         val fuelFlowLph = kgSecToLph(state.fuelFlowKgSec, FuelType.AVGAS)
         val angle = needleAngle(fuelFlowLph, 0f, 20f, -150f, 150f)
         drawNeedle(angle)
-        textRenderer.drawText("%.1f".format(fuelFlowLph), -0.35f, -0.75f, 0.55f, whiteColor)
+        textRenderer.drawText("%.1f".format(fuelFlowLph), -0.10f, -0.85f, 0.18f, whiteColor)
     }
 
     private fun drawFq(state: GaugeState, lay: GaugePanelLayout) {
@@ -311,7 +311,7 @@ class SteamGaugePanelRenderer(
         // Tank readouts.
         val leftKg = state.fuelQtyKg.getOrElse(0) { 0f }
         val rightKg = state.fuelQtyKg.getOrElse(1) { 0f }
-        textRenderer.drawText("L:%.0f R:%.0f".format(leftKg, rightKg), -0.7f, -0.8f, 0.45f, whiteColor)
+        textRenderer.drawText("L:%.0f R:%.0f".format(leftKg, rightKg), -0.30f, -0.85f, 0.15f, whiteColor)
     }
 
     private fun drawEgt(state: GaugeState, lay: GaugePanelLayout) {

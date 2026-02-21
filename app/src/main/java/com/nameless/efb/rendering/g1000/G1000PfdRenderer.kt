@@ -248,12 +248,18 @@ class G1000PfdRenderer(
         // Roll scale arc.
         drawRollScale(snap?.rollDeg ?: 0f, vp)
 
-        // Fixed aircraft symbol at centre.
+        // Fixed aircraft symbol at centre — yellow inverted-V chevron.
         GLES30.glUseProgram(colorProg)
-        GLES30.glUniform4f(colorLoc, 1f, 1f, 1f, 1f)
-        drawColoredBar(-0.15f, 0f, 0.15f, 0f, 0.03f)        // wings
-        drawColoredBar(0f, 0f, 0f, -0.08f, 0.02f)            // tail
-        drawFilledQuad(-0.02f, -0.02f, 0.04f, 0.04f)         // centre dot
+        val yellowR = 0.90f; val yellowG = 0.80f; val yellowB = 0.0f
+        GLES30.glUniform4f(colorLoc, yellowR, yellowG, yellowB, 1f)
+        // Left wing: horizontal extension → diagonal down to centre.
+        drawColoredBar(-0.22f, 0.0f, -0.12f, 0.0f, 0.025f)  // left wing tip
+        drawColoredBar(-0.12f, 0.0f, 0.0f,  -0.06f, 0.025f)  // left diagonal
+        // Right wing: diagonal from centre → horizontal extension.
+        drawColoredBar(0.0f,  -0.06f, 0.12f, 0.0f, 0.025f)   // right diagonal
+        drawColoredBar(0.12f,  0.0f,  0.22f, 0.0f, 0.025f)   // right wing tip
+        // Small centre dot at the lowest point of the V.
+        drawFilledQuad(-0.015f, -0.075f, 0.03f, 0.03f)
 
         // Slip/skid indicator below roll pointer.
         val slip = snap?.slipDeg ?: 0f
@@ -293,9 +299,9 @@ class G1000PfdRenderer(
             if (abs(interval) % 10f == 0f && abs(interval) > 0f) {
                 val numStr = "%.0f".format(abs(interval))
                 textRenderer.drawText(numStr,
-                    cx + lineHalf * cosR + 0.03f,
-                    cy - lineHalf * sinR - 0.02f,
-                    0.35f, whiteColor)
+                    cx + lineHalf * cosR + 0.02f,
+                    cy - lineHalf * sinR - 0.015f,
+                    0.05f, whiteColor)
             }
         }
     }
@@ -339,15 +345,20 @@ class G1000PfdRenderer(
 
         val tape = tapeRenderer
         if (tape != null) {
-            // Draw scrolling tape texture.
+            // Draw scrolling tape texture — show ~55 kts window centred on current IAS.
             GLES30.glUseProgram(tapeProg)
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tape.airspeedTextureId)
             GLES30.glUniform1i(tapeTexLoc, 0)
-            // Scroll: IAS 0 = bottom of texture, 300 = top. Normalise to 0..1.
-            val scroll = ias / 300f
-            GLES30.glUniform1f(tapeScrollLoc, scroll)
-            drawTapeQuad()
+            GLES30.glUniform1f(tapeScrollLoc, 0f)  // no shader-side scroll
+            // Centre the UV window on current IAS.
+            // V=0 → 300 kts (canvas top/bitmap row 0), V=1 → 0 kts (canvas bottom).
+            val centreV = 1f - (ias / 300f).coerceIn(0f, 1f)
+            val windowV = 55f / 300f   // show ~55 kts of the 300 kt range
+            // topV = lower V = higher speed (at screen top)
+            val topV = (centreV - windowV / 2f).coerceIn(0f, 1f - windowV)
+            val botV = topV + windowV
+            drawTapeQuadUv(botV, topV)
         } else {
             // Fallback: solid background.
             GLES30.glUseProgram(colorProg)
@@ -359,7 +370,7 @@ class G1000PfdRenderer(
         GLES30.glUseProgram(colorProg)
         GLES30.glUniform4f(colorLoc, 0f, 0f, 0f, 1f)
         drawFilledQuad(-0.95f, -0.14f, 1.9f, 0.28f)
-        textRenderer.drawText("%.0f".format(ias), -0.75f, -0.08f, 0.7f, whiteColor)
+        textRenderer.drawText("%.0f".format(ias), -0.55f, -0.06f, 0.14f, whiteColor)
 
         // Trend vector.
         if (abs(trendKt) > 1f) {
@@ -370,7 +381,7 @@ class G1000PfdRenderer(
 
         // TAS readout below tape.
         val tas = snap?.tasKts ?: 0f
-        textRenderer.drawText("TAS %.0f".format(tas), -0.9f, -0.92f, 0.4f, whiteColor)
+        textRenderer.drawText("TAS %.0f".format(tas), -0.85f, -0.94f, 0.06f, whiteColor)
     }
 
     // ── G-03: Altitude tape ─────────────────────────────────────────────────────
@@ -378,27 +389,46 @@ class G1000PfdRenderer(
     private fun drawAltitudeTape(snap: SimSnapshot?, vp: GlViewport, altFt: Float) {
         applyViewport(vp)
 
-        val tape = tapeRenderer
-        if (tape != null) {
-            GLES30.glUseProgram(tapeProg)
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tape.altitudeTextureId)
-            GLES30.glUniform1i(tapeTexLoc, 0)
-            // Scroll normalised: -1000 to 50000 ft range.
-            val scroll = (altFt + 1000f) / 51000f
-            GLES30.glUniform1f(tapeScrollLoc, scroll)
-            drawTapeQuad()
-        } else {
-            GLES30.glUseProgram(colorProg)
-            GLES30.glUniform4f(colorLoc, 0.1f, 0.1f, 0.1f, 1f)
-            drawFilledQuad(-1f, -1f, 2f, 2f)
+        // Dark background.
+        GLES30.glUseProgram(colorProg)
+        GLES30.glUniform4f(colorLoc, 0.10f, 0.10f, 0.10f, 1f)
+        drawFilledQuad(-1f, -1f, 2f, 2f)
+
+        // Procedural altitude tape — draw ticks and numbers for visible ±300 ft.
+        val visibleRange = 300f  // ±300 ft from centre
+        val clipPerFt = 1f / visibleRange  // clip units per foot (1 clip unit = half viewport)
+
+        GLES30.glUniform4f(colorLoc, 1f, 1f, 1f, 1f)
+
+        // Round to nearest 20 ft for tick stepping.
+        val baseAlt = (((altFt - visibleRange).toInt() / 20) * 20)
+        val topAlt  = (((altFt + visibleRange).toInt() / 20 + 1) * 20)
+        var alt = baseAlt
+        while (alt <= topAlt) {
+            val yClip = (alt - altFt) * clipPerFt
+            if (yClip < -1.1f || yClip > 1.1f) { alt += 20; continue }
+
+            if (alt % 100 == 0) {
+                // Major tick + number.
+                GLES30.glUniform4f(colorLoc, 1f, 1f, 1f, 1f)
+                drawColoredBar(-1f, yClip, -0.50f, yClip, 0.015f)
+                // Draw altitude number (hundreds).
+                val label = "$alt"
+                textRenderer.drawText(label, -0.45f, yClip - 0.035f, 0.07f, whiteColor)
+            } else {
+                // Minor tick at every 20 ft.
+                GLES30.glUseProgram(colorProg)
+                GLES30.glUniform4f(colorLoc, 0.6f, 0.6f, 0.6f, 1f)
+                drawColoredBar(-1f, yClip, -0.70f, yClip, 0.008f)
+            }
+            alt += 20
         }
 
         // Centre readout box with current altitude.
         GLES30.glUseProgram(colorProg)
         GLES30.glUniform4f(colorLoc, 0f, 0f, 0f, 1f)
         drawFilledQuad(-0.95f, -0.14f, 1.9f, 0.28f)
-        textRenderer.drawText("%.0f".format(altFt), -0.85f, -0.08f, 0.6f, whiteColor)
+        textRenderer.drawText("%.0f".format(altFt), -0.65f, -0.05f, 0.10f, whiteColor)
 
         // Kollsman window (baro setting).
         val baroInhg = snap?.barometerInhg ?: 29.92f
@@ -406,17 +436,16 @@ class G1000PfdRenderer(
             BaroUnit.HPA -> "%.0f hPa".format(G1000PfdMath.inHgToHpa(baroInhg))
             BaroUnit.INHG -> "%.2f\"".format(baroInhg)
         }
-        textRenderer.drawText(baroText, -0.9f, -0.92f, 0.38f, cyanColor)
+        textRenderer.drawText(baroText, -0.75f, -0.94f, 0.06f, cyanColor)
     }
 
-    /** Draw a full-viewport tape quad using the quad VAO with UVs. */
-    private fun drawTapeQuad() {
-        // Full-viewport quad with UVs.
+    /** Draw a full-viewport quad sampling a V sub-range of the bound tape texture. */
+    private fun drawTapeQuadUv(botV: Float, topV: Float) {
         val verts = floatArrayOf(
-            -1f, -1f, 0f, 0f,
-             1f, -1f, 1f, 0f,
-            -1f,  1f, 0f, 1f,
-             1f,  1f, 1f, 1f,
+            -1f, -1f, 0f, botV,
+             1f, -1f, 1f, botV,
+            -1f,  1f, 0f, topV,
+             1f,  1f, 1f, topV,
         )
         quadBuf.uploadDynamic(verts)
         quadVao.bind()
@@ -442,7 +471,7 @@ class G1000PfdRenderer(
 
         // VS text readout.
         val sign = if (vsiFpm >= 0) "+" else ""
-        textRenderer.drawText("$sign%.0f".format(vsiFpm), -0.9f, -0.15f, 0.35f, whiteColor)
+        textRenderer.drawText("$sign%.0f".format(vsiFpm), -0.85f, -0.04f, 0.05f, whiteColor)
     }
 
     // ── G-05: HSI ───────────────────────────────────────────────────────────────
@@ -468,8 +497,8 @@ class G1000PfdRenderer(
             drawCompassCard(heading, arcMode)
         }
 
-        // Heading readout at top.
-        textRenderer.drawText("%03.0f\u00B0".format(heading), -0.2f, 0.85f, 0.5f, whiteColor)
+        // Heading readout at top-centre.
+        textRenderer.drawText("%03.0f".format(heading), -0.03f, 0.80f, 0.18f, whiteColor)
 
         // CDI bar (magenta).
         val cdiNorm = G1000PfdMath.computeCdiPosition(hdef, CDI_DOT_SPACING_PX) / (vp.width / 2f)
@@ -592,9 +621,9 @@ class G1000PfdRenderer(
                 if (label.isNotEmpty()) {
                     val labelR = innerR - 0.08f
                     textRenderer.drawText(label,
-                        sx * labelR - 0.03f * label.length,
-                        sy * labelR + discCentreY - 0.03f,
-                        0.35f, whiteColor)
+                        sx * labelR - 0.01f * label.length,
+                        sy * labelR + discCentreY - 0.06f,
+                        0.14f, whiteColor)
                 }
             }
         }
@@ -606,11 +635,11 @@ class G1000PfdRenderer(
         applyViewport(vp)
         GLES30.glUseProgram(colorProg)
         GLES30.glUniform4f(colorLoc, 0f, 0f, 0f, 0.6f)
-        drawFilledQuad(-0.5f, 0.75f, 1.0f, 0.20f)
+        drawFilledQuad(-0.98f, 0.75f, 0.45f, 0.20f)
 
-        // Active waypoint / nav source.
+        // Active nav source CRS — upper-left of HSI.
         val obs = snap?.nav1ObsDeg ?: 0f
-        textRenderer.drawText("CRS %03.0f".format(obs), -0.45f, 0.80f, 0.35f, greenColor)
+        textRenderer.drawText("CRS %03.0f".format(obs), -0.96f, 0.78f, 0.16f, greenColor)
     }
 
     // ── G-07: Inset map ─────────────────────────────────────────────────────────
@@ -655,7 +684,7 @@ class G1000PfdRenderer(
         }
 
         // Wind digits.
-        textRenderer.drawText("%03.0f/%02.0f".format(windDir, windSpd), -0.9f, -0.5f, 0.35f, whiteColor)
+        textRenderer.drawText("%03.0f/%02.0f".format(windDir, windSpd), -0.85f, -0.45f, 0.70f, whiteColor)
     }
 
     // ── G-09: Marker beacons ────────────────────────────────────────────────────
@@ -671,20 +700,20 @@ class G1000PfdRenderer(
             val visible = (timeSec % 0.5f) < 0.25f
             if (visible) {
                 GLES30.glUniform4f(colorLoc, 0f, 1f, 1f, 1f)
-                textRenderer.drawText("OM", -0.7f, -0.3f, 0.6f, cyanColor)
+                textRenderer.drawText("OM", -0.7f, -0.35f, 0.70f, cyanColor)
             }
         }
         if (snap?.middleMarker == true) {
             val visible = (timeSec % 0.63f) < 0.315f
             if (visible) {
                 val amberColor = floatArrayOf(1f, 0.749f, 0f, 1f)
-                textRenderer.drawText("MM", -0.2f, -0.3f, 0.6f, amberColor)
+                textRenderer.drawText("MM", -0.2f, -0.35f, 0.70f, amberColor)
             }
         }
         if (snap?.innerMarker == true) {
             val visible = (timeSec % 0.167f) < 0.083f
             if (visible) {
-                textRenderer.drawText("IM", 0.3f, -0.3f, 0.6f, whiteColor)
+                textRenderer.drawText("IM", 0.3f, -0.35f, 0.70f, whiteColor)
             }
         }
     }
@@ -698,7 +727,7 @@ class G1000PfdRenderer(
 
         val oat = snap?.oatDegc ?: 0f
         val tas = snap?.tasKts ?: 0f
-        textRenderer.drawText("OAT %.0fC TAS %.0f".format(oat, tas), -0.9f, -0.3f, 0.3f, whiteColor)
+        textRenderer.drawText("OAT %.0fC TAS %.0f".format(oat, tas), -0.85f, -0.40f, 0.60f, whiteColor)
     }
 
     // ── G-31: AP mode annunciator strip ─────────────────────────────────────────
@@ -714,21 +743,21 @@ class G1000PfdRenderer(
 
         // Lateral mode labels.
         if (flags and AP_HDG != 0) {
-            textRenderer.drawText("HDG", -0.95f, -0.4f, 0.55f, greenColor)
+            textRenderer.drawText("HDG", -0.95f, -0.40f, 0.80f, greenColor)
         }
         if (flags and AP_NAV != 0) {
-            textRenderer.drawText("NAV", -0.5f, -0.4f, 0.55f, greenColor)
+            textRenderer.drawText("NAV", -0.50f, -0.40f, 0.80f, greenColor)
         }
 
         // Vertical mode labels.
         if (flags and AP_VS != 0) {
-            textRenderer.drawText("VS", 0.15f, -0.4f, 0.55f, greenColor)
+            textRenderer.drawText("VS", 0.15f, -0.40f, 0.80f, greenColor)
         }
         if (flags and AP_ALT != 0) {
-            textRenderer.drawText("ALT", 0.45f, -0.4f, 0.55f, greenColor)
+            textRenderer.drawText("ALT", 0.45f, -0.40f, 0.80f, greenColor)
         }
         if (flags and AP_FLC != 0) {
-            textRenderer.drawText("FLC", 0.75f, -0.4f, 0.55f, greenColor)
+            textRenderer.drawText("FLC", 0.75f, -0.40f, 0.80f, greenColor)
         }
     }
 
