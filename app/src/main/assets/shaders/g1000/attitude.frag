@@ -13,6 +13,7 @@ const vec3 SKY_TOP    = vec3(0.0,   0.122, 0.302);  // #001F4D
 const vec3 SKY_BOT    = vec3(0.0,   0.384, 0.671);  // #0062AB
 const vec3 GND_TOP    = vec3(0.361, 0.239, 0.039);  // #5C3D0A
 const vec3 GND_BOT    = vec3(0.165, 0.094, 0.0);    // #2A1800
+const vec3 HORIZON    = vec3(0.90,  0.80,  0.0);    // yellow horizon line (CRG)
 
 void main() {
     // Rotate fragment position by bank angle.
@@ -26,7 +27,11 @@ void main() {
     float horizon   = u_pitch_deg * pixPerDeg;
 
     vec3 color;
-    if (rotated.y > horizon) {
+    // Yellow horizon line: ~2 px at nominal 800px height (CRG).
+    float horizonHalfWidth = 0.003;
+    if (abs(rotated.y - horizon) < horizonHalfWidth) {
+        color = HORIZON;
+    } else if (rotated.y > horizon) {
         // Sky — gradient from bottom (brighter) to top (darker).
         float t = clamp((rotated.y - horizon) / 0.5, 0.0, 1.0);
         color = mix(SKY_BOT, SKY_TOP, t);
@@ -36,7 +41,7 @@ void main() {
         color = mix(GND_TOP, GND_BOT, t);
     }
 
-    // Theme-dependent brightness and tint.
+    // Theme-dependent brightness (applies to sky, ground, and horizon line). and tint.
     // u_theme: 0.0 = day, 1.0 = night, 2.0 = red-cockpit (from common_uniforms.glsl)
     if (u_theme >= 1.5) {
         // Red cockpit — desaturate to luminance then tint red at 70%.

@@ -101,9 +101,13 @@ class G1000TapeRenderer(typeface: Typeface) {
         }
         val bandWidth = 6f
 
+        // Low-speed red band: 0 to 50 kt (stall / low-speed awareness per G1000 CRG).
+        bandPaint.color = Color.RED
+        drawBand(canvas, bandPaint, 0, 50, pxPerKt, totalH, 0f, bandWidth)
+
         // White arc: Vso (40) to Vfe (85).
         bandPaint.color = Color.WHITE
-        drawBand(canvas, bandPaint, 40, 85, pxPerKt, totalH, 0f, bandWidth)
+        drawBand(canvas, bandPaint, 40, 85, pxPerKt, totalH, bandWidth, bandWidth)
 
         // Green arc: Vs1 (48) to Vno (127).
         bandPaint.color = Color.GREEN

@@ -3,65 +3,60 @@ package com.nameless.efb.rendering.g1000
 import com.nameless.efb.rendering.gauge.GlViewport
 
 /**
- * Viewport layout for the G1000 PFD at 1280×800 nominal resolution.
+ * Viewport layout for the G1000 PFD at 1280x800 nominal resolution.
+ * Matches the Garmin G1000 CRG Rev. R layout proportions.
  *
- * All coordinates scale proportionally when the surface is a different size.
  * GL convention: y = 0 is the bottom of the framebuffer.
- *
- * Nominal layout (screen top = 0):
- * ```
- *  y=0  ┌──────────────────────────────────────────────────────────────────┐
- *  y=30 │ Mode annunciator strip (G-31)                                    │
- *       ├──────┬──────────────────────────────────────────────┬────────────┤
- *       │ IAS  │            Attitude indicator (G-01)         │ ALT (G-03) │
- *       │ Tape │                                              │            │
- *       │ G-02 │                                              │ VSI (G-04) │
- * y=580 ├──────┼──────────────────────────────────────────────┴────────────┤
- *       │Inset │      HSI (G-05) + Nav status box (G-06)                   │
- *       │ Map  ├──────────────────────────────────────────────────────────┤
- *       │ G-07 │ Wind G-08 │ OAT/TAS G-10 │ Marker beacons G-09           │
- * y=800 └──────┴────────────────────────────────────────────────────────── ┘
- *        x=0   x=180                               x=1100              x=1280
- * ```
  */
 class G1000PfdLayout(totalWidth: Int, totalHeight: Int) {
 
-    // Scale factors from nominal 1280×800.
+    // Scale factors from nominal 1280x800.
     private val sx = totalWidth  / 1280f
     private val sy = totalHeight /  800f
 
     private fun px(nominalX: Int) = (nominalX * sx).toInt()
     private fun py(nominalY: Int) = (nominalY * sy).toInt()
 
-    // Helper: build viewport, clamping to at-least-1-pixel dimensions.
     private fun vp(x: Int, y: Int, w: Int, h: Int) =
         GlViewport(maxOf(0, x), maxOf(0, y), maxOf(1, w), maxOf(1, h))
 
-    // ── Nominal GL y-origins (screen y converted to GL y = totalHeight - screen_y) ──
-
     private val glH = totalHeight
 
-    // Annunciator strip: screen y=0..30  →  GL y=glH-30 .. glH
-    val annunciator  = vp(0, glH - py(30),                    totalWidth,  py(30))
+    // NAV/COM frequency bar: screen y=0..45
+    val navComBar    = vp(0, glH - py(45), totalWidth, py(45))
 
-    // IAS tape: x=0..180, screen y=30..580  →  GL y=glH-580 .. glH-30
-    val ias          = vp(0,         glH - py(580), px(180),  py(550))
+    // Full attitude background: entire area between navComBar and softkeyBar.
+    // screen y=45..775, full width — drawn first as background layer.
+    val attitudeFull = vp(0, py(25), totalWidth, py(730))
 
-    // Attitude: x=180..1100, screen y=30..580
-    val attitude     = vp(px(180),   glH - py(580), px(920),  py(550))
+    // IAS tape: x=30..140, screen y=75..380 (inset from edges, not full height)
+    val ias          = vp(px(30),   glH - py(380), px(110), py(305))
 
-    // Altitude tape: x=1100..1220, screen y=30..580
-    val altitude     = vp(px(1100),  glH - py(580), px(120),  py(550))
+    // Attitude overlay area (for pitch ladder, aircraft symbol, etc.): x=140..1060, screen y=45..390
+    val attitude     = vp(px(140),  glH - py(390), px(920), py(345))
 
-    // VSI tape: x=1220..1280, screen y=30..580
-    val vsi          = vp(px(1220),  glH - py(580), px(60),   py(550))
+    // Altitude tape: x=1060..1190, screen y=75..380 (inset from edges, not full height)
+    val altitude     = vp(px(1060), glH - py(380), px(130), py(305))
 
-    // Inset map: 180×150px bottom-left corner of PFD (GL y=0)
-    val insetMap     = vp(0, 0,                                px(180),  py(150))
+    // VSI tape: x=1190..1250, screen y=75..380 (inset from edges, not full height)
+    val vsi          = vp(px(1190), glH - py(380), px(60),  py(305))
 
-    // HSI area: x=180..1100, screen y=580..770  →  GL y=glH-770 .. glH-580
-    val hsi          = vp(px(180),   glH - py(770), px(920),  py(190))
+    // HSI area: x=140..1060, screen y=390..775 (same width as attitude)
+    val hsi          = vp(px(140),  glH - py(775), px(920), py(385))
 
-    // Bottom data strip (wind, OAT/TAS, markers): x=180..1280, screen y=770..800  →  GL y=0..30
-    val bottomStrip  = vp(px(180),   0,             px(1100), py(30))
+    // Dark flanking panels — full height from nav bar to softkey bar.
+    // Left panel covers x=0..140 (entire left side behind IAS tape).
+    val leftFlank    = vp(0,        py(25), px(140), py(730))
+    // Right panel covers x=1060..1280 (entire right side behind ALT/VSI).
+    val rightFlank   = vp(px(1060), py(25), px(220), py(730))
+
+    // Inset map: bottom-left corner, screen y=580..775, x=0..160
+    val insetMap     = vp(0, py(25), px(160), py(195))
+
+    // Softkey bar: screen y=775..800
+    val softkeyBar   = vp(0, 0, totalWidth, py(25))
+
+    // Legacy viewports (kept for API compatibility, minimized)
+    val annunciator  = vp(0, 0, 1, 1)
+    val bottomStrip  = vp(0, py(25), totalWidth, py(30))
 }

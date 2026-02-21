@@ -8,7 +8,9 @@ import com.nameless.efb.rendering.g1000.HsiMode
 import com.nameless.efb.rendering.gauge.SteamGaugePanelRenderer
 import com.nameless.efb.rendering.gl.Theme
 import com.nameless.efb.ui.steam.GaugeState
+import java.awt.image.BufferedImage
 import java.io.File
+import javax.imageio.ImageIO
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10Stub
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,12 @@ private const val H = 800
 
 // ── Test scenarios ────────────────────────────────────────────────────────────
 
-private data class Scenario(val filename: String, val render: () -> Unit)
+private data class Scenario(
+    val filename: String,
+    val width: Int = W,
+    val height: Int = H,
+    val render: () -> Unit,
+)
 
 fun main(args: Array<String>) {
     val outputDir = File(args.firstOrNull() ?: "visual-tests/output")
@@ -51,7 +58,7 @@ fun main(args: Array<String>) {
         print("  [${scenario.filename}] ")
         try {
             scenario.render()
-            Readback.capture(W, H, File(outputDir, "${scenario.filename}.png"))
+            Readback.capture(scenario.width, scenario.height, File(outputDir, "${scenario.filename}.png"))
             passed++
         } catch (e: Exception) {
             println("FAILED: ${e.message}")
@@ -61,6 +68,50 @@ fun main(args: Array<String>) {
     }
 
     GlContext.destroy()
+
+    // ── Generate comparison images for scenario 14 ──────────────────────────
+    val refFile = File("docs/reference/G1000Ref.png")
+    val outFile = File(outputDir, "14_g1000_ref.png")
+    if (refFile.exists() && outFile.exists()) {
+        try {
+            val refImg = ImageIO.read(refFile)
+            val outImg = ImageIO.read(outFile)
+            if (refImg.width == outImg.width && refImg.height == outImg.height) {
+                val w = refImg.width
+                val h = refImg.height
+
+                // XOR (absolute difference) image.
+                val xorImg = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+                for (y in 0 until h) {
+                    for (x in 0 until w) {
+                        val rPx = refImg.getRGB(x, y)
+                        val oPx = outImg.getRGB(x, y)
+                        val dr = kotlin.math.abs(((rPx shr 16) and 0xFF) - ((oPx shr 16) and 0xFF))
+                        val dg = kotlin.math.abs(((rPx shr 8) and 0xFF) - ((oPx shr 8) and 0xFF))
+                        val db = kotlin.math.abs((rPx and 0xFF) - (oPx and 0xFF))
+                        xorImg.setRGB(x, y, (0xFF shl 24) or (dr shl 16) or (dg shl 8) or db)
+                    }
+                }
+                val xorFile = File(outputDir, "14_g1000_xor.png")
+                ImageIO.write(xorImg, "PNG", xorFile)
+                println("  XOR diff: ${xorFile.absolutePath}")
+
+                // Side-by-side: reference | output.
+                val sbs = BufferedImage(w * 2, h, BufferedImage.TYPE_INT_ARGB)
+                val g = sbs.createGraphics()
+                g.drawImage(refImg, 0, 0, null)
+                g.drawImage(outImg, w, 0, null)
+                g.dispose()
+                val sbsFile = File(outputDir, "14_g1000_comparison.png")
+                ImageIO.write(sbs, "PNG", sbsFile)
+                println("  Comparison: ${sbsFile.absolutePath}")
+            } else {
+                println("  Skipping comparison: size mismatch (ref=${refImg.width}x${refImg.height}, out=${outImg.width}x${outImg.height})")
+            }
+        } catch (e: Exception) {
+            println("  Comparison failed: ${e.message}")
+        }
+    }
 
     println()
     println("$passed passed, $failed failed")
@@ -365,6 +416,53 @@ private fun buildScenarios(
         )
         renderer.onSurfaceCreated(gl, eglConf)
         renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
+
+    // ── G1000 PFD — pixel-perfect match to docs/reference/G1000Ref.png ─────
+    // Reference state: level flight, 360° HDG, CRS 350°, alt -20 ft, IAS 30 kt,
+    // baro 29.92 inHg, OAT 0°C, TAS 0 kt, full rose HSI, TRAFFIC on.
+    // Compare: visual-tests/output/14_g1000_ref.png vs docs/reference/G1000Ref.png
+
+    val g1000RefSnap = SimSnapshot(
+        latitude        = -26.1392,
+        longitude       = 28.2460,
+        elevationM      = -20.0 * 0.3048,  // -20 ft for ref altitude readout
+        groundspeedMs   = 0f,
+        pitchDeg        = 0f,
+        rollDeg         = 0f,
+        magHeadingDeg   = 360f,
+        groundTrackDeg  = 360f,
+        iasKts          = 30f,
+        tasKts          = 0f,
+        vviFpm          = 0f,
+        oatDegc         = 0f,
+        barometerInhg   = 29.92f,
+        nav1ObsDeg      = 350f,
+        nav1HdefDot     = -0.3f,
+        apHeadingBugDeg = 360f,
+        apAltitudeFt    = 20f,   // altitude bug at 20 ft (visible on tape)
+        com1ActiveHz    = 136_975_000,
+        com1StandbyHz   = 118_000_000,
+        com2ActiveHz    = 136_975_000,
+        nav1ActiveHz    = 108_000_000,
+        nav1StandbyHz   = 117_950_000,
+        transponderCode = 0,
+        transponderMode = 4,
+        trafficCount    = 1,
+    )
+
+    // Reference image is 515x389 — render at same resolution for direct comparison.
+    val refW = 515
+    val refH = 389
+
+    add(Scenario("14_g1000_ref", width = refW, height = refH) {
+        val simData  = MutableStateFlow<SimSnapshot?>(g1000RefSnap)
+        val renderer = G1000PfdRenderer(assets, simData, insetMap = null, theme = Theme.DAY)
+        renderer.hsiMode  = HsiMode.FULL_360
+        renderer.baroUnit = BaroUnit.INHG
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, refW, refH)
         renderer.onDrawFrame(gl)
     })
 }
