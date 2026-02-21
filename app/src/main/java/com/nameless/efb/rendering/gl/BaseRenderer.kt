@@ -1,6 +1,7 @@
 package com.nameless.efb.rendering.gl
 
 import android.content.res.AssetManager
+import android.graphics.Typeface
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.util.Log
@@ -34,6 +35,9 @@ abstract class BaseRenderer(
     protected lateinit var gaugeAtlas: GaugeTextureAtlas
         private set
 
+    protected lateinit var textRenderer: TextRenderer
+        private set
+
     // ── GLSurfaceView.Renderer ────────────────────────────────────────────────
 
     override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
@@ -42,13 +46,22 @@ abstract class BaseRenderer(
         GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
+        GLES30.glDepthFunc(GLES30.GL_LEQUAL) // allow overlays at the same z as backgrounds
         GLES30.glClearColor(0f, 0f, 0f, 1f)
 
         shaderManager = ShaderManager(assets)
+        val typeface = loadTypeface()
+
         gaugeAtlas    = GaugeTextureAtlas(shaderManager)
+        gaugeAtlas.typeface = typeface
         gaugeAtlas.buildAll(theme)
 
+        textRenderer = TextRenderer(shaderManager, typeface)
+
         onGlReady()
+
+        // Set u_theme on all programs now that subclass has created them.
+        shaderManager.setThemeUniform(theme.uniformValue)
     }
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
@@ -81,6 +94,17 @@ abstract class BaseRenderer(
      */
     protected abstract fun drawFrame()
 
+    // ── Font loading ────────────────────────────────────────────────────────────
+
+    private fun loadTypeface(): Typeface {
+        return try {
+            Typeface.createFromAsset(assets, "fonts/LiberationMono-Regular.ttf")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load Liberation Mono font, using default: ${e.message}")
+            Typeface.MONOSPACE
+        }
+    }
+
     // ── Theme change ──────────────────────────────────────────────────────────
 
     /**
@@ -91,6 +115,9 @@ abstract class BaseRenderer(
         theme = newTheme
         if (::gaugeAtlas.isInitialized) {
             gaugeAtlas.buildAll(newTheme)
+        }
+        if (::shaderManager.isInitialized) {
+            shaderManager.setThemeUniform(newTheme.uniformValue)
         }
     }
 }

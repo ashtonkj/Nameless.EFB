@@ -8,5 +8,7 @@ object Color {
     const val RED         = -65536       // 0xFFFF0000
     const val GREEN       = -16711936    // 0xFF00FF00
     const val BLUE        = -16776961    // 0xFF0000FF
+    const val YELLOW      = -256         // 0xFFFFFF00
+    const val CYAN        = -16711681   // 0xFF00FFFF
     const val TRANSPARENT = 0
 }

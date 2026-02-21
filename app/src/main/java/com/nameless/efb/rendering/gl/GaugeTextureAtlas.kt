@@ -1,6 +1,11 @@
 package com.nameless.efb.rendering.gl
 
+import android.graphics.Bitmap
+import android.graphics.Typeface
 import android.opengl.GLES30
+import android.opengl.GLUtils
+import com.nameless.efb.domain.gauge.AircraftProfile
+import com.nameless.efb.rendering.gauge.DialFaceRenderer
 
 /** Identifiers for each pre-rendered gauge dial face. */
 enum class GaugeType {
@@ -24,8 +29,7 @@ enum class GaugeType {
  * Manages pre-rendered gauge dial-face textures.
  *
  * Each dial face is rendered once at startup (and again on theme change) into a
- * dedicated 512×512 RGBA FBO texture.  Moving elements (needles, arcs) are drawn
- * on top every frame.
+ * dedicated 512x512 RGBA texture via [DialFaceRenderer] + Canvas.
  *
  * Must be created and used on the GL thread.
  */
@@ -35,19 +39,24 @@ class GaugeTextureAtlas(
 ) {
     private val textureIds = mutableMapOf<GaugeType, Int>()
 
+    /** Aircraft profile for V-speed arcs — can be updated before [buildAll]. */
+    var profile: AircraftProfile = AircraftProfile()
+
+    /** Typeface for dial face numbers — set by [BaseRenderer] before [buildAll]. */
+    var typeface: Typeface = Typeface.MONOSPACE
+
     /**
-     * Allocate and initialise all gauge background textures for [theme].
+     * Render and upload all gauge background textures for [theme].
      *
-     * Existing textures for the same theme are released first, so this can be
-     * called again on theme change.  Must be called from the GL thread.
-     *
-     * NOTE: Actual dial artwork is rendered in Plan 06.  This call allocates
-     * blank textures so the pipeline is exercised end-to-end.
+     * Existing textures are released first, so this can be called again on
+     * theme change.  Must be called from the GL thread.
      */
     fun buildAll(theme: Theme) {
         release()
         for (type in GaugeType.entries) {
-            textureIds[type] = allocateBlankTexture(ATLAS_TEXTURE_SIZE)
+            val bitmap = renderDialFace(type)
+            textureIds[type] = uploadBitmap(bitmap)
+            bitmap.recycle()
         }
     }
 
@@ -68,26 +77,34 @@ class GaugeTextureAtlas(
 
     // ── Private ───────────────────────────────────────────────────────────────
 
-    private fun allocateBlankTexture(size: Int): Int {
+    private fun renderDialFace(type: GaugeType): Bitmap = when (type) {
+        GaugeType.AIRSPEED           -> DialFaceRenderer.renderAsi(profile, typeface)
+        GaugeType.ALTITUDE           -> DialFaceRenderer.renderAltimeter(typeface)
+        GaugeType.ATTITUDE           -> DialFaceRenderer.renderAttitude(typeface)
+        GaugeType.VERTICAL_SPEED     -> DialFaceRenderer.renderVsi(typeface)
+        GaugeType.HEADING            -> DialFaceRenderer.renderHeading(typeface)
+        GaugeType.TURN_COORDINATOR   -> DialFaceRenderer.renderTurnCoordinator(typeface)
+        GaugeType.RPM                -> DialFaceRenderer.renderRpm(profile, typeface)
+        GaugeType.MANIFOLD_PRESSURE  -> DialFaceRenderer.renderManifoldPressure(typeface)
+        GaugeType.FUEL_QUANTITY      -> DialFaceRenderer.renderFuelQty(typeface)
+        GaugeType.OIL_PRESSURE       -> DialFaceRenderer.renderOilTempPress(typeface)
+        GaugeType.OIL_TEMPERATURE    -> DialFaceRenderer.renderOilTempPress(typeface)
+        GaugeType.EGT                -> DialFaceRenderer.renderEgt(typeface)
+        GaugeType.VOLTMETER          -> DialFaceRenderer.renderVoltmeter(typeface)
+        GaugeType.SUCTION            -> DialFaceRenderer.renderSuction(typeface)
+    }
+
+    private fun uploadBitmap(bitmap: Bitmap): Int {
         val ids = IntArray(1)
         GLES30.glGenTextures(1, ids, 0)
         val id = ids[0]
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, id)
-        // Allocate storage (no pixel data — dial artwork rendered in Plan 06).
-        GLES30.glTexImage2D(
-            GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA,
-            size, size, 0,
-            GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, null,
-        )
+        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
         return id
-    }
-
-    private companion object {
-        const val ATLAS_TEXTURE_SIZE = 512
     }
 }

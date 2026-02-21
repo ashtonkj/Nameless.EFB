@@ -50,15 +50,19 @@ val syncRendererSources by tasks.registering(Sync::class) {
             "com/nameless/efb/rendering/gl/GlBuffer.kt",
             "com/nameless/efb/rendering/gl/GlCapabilities.kt",
             "com/nameless/efb/rendering/gl/ShaderManager.kt",
+            "com/nameless/efb/rendering/gl/TextRenderer.kt",
             "com/nameless/efb/rendering/gl/Theme.kt",
 
             // Steam gauge panel
+            "com/nameless/efb/rendering/gauge/DialFaceRenderer.kt",
             "com/nameless/efb/rendering/gauge/GaugePanelLayout.kt",
             "com/nameless/efb/rendering/gauge/GlViewport.kt",
             "com/nameless/efb/rendering/gauge/SteamGaugePanelRenderer.kt",
 
-            // G1000 PFD (PfdInsetMap.kt is replaced by a stub — avoids MapRenderer dep)
+            // G1000 PFD (PfdInsetMap.kt is replaced by a stub -- avoids MapRenderer dep)
             "com/nameless/efb/rendering/g1000/BaroUnit.kt",
+            "com/nameless/efb/rendering/g1000/G1000HsiRenderer.kt",
+            "com/nameless/efb/rendering/g1000/G1000TapeRenderer.kt",
             "com/nameless/efb/rendering/g1000/G1000Colours.kt",
             "com/nameless/efb/rendering/g1000/G1000PfdLayout.kt",
             "com/nameless/efb/rendering/g1000/G1000PfdMath.kt",

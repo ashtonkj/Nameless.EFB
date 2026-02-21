@@ -250,4 +250,121 @@ private fun buildScenarios(
         renderer.onSurfaceChanged(gl, W, H)
         renderer.onDrawFrame(gl)
     })
+
+    // ── Steam gauge panel — all 14 gauges with non-zero engine values ──────────
+
+    add(Scenario("09_steam_all_gauges") {
+        val renderer = SteamGaugePanelRenderer(assets, theme = Theme.DAY)
+        renderer.gaugeState = GaugeState(
+            airspeedKts      = 135f,
+            pitchDeg         = 1f,
+            rollDeg          = 3f,
+            altFt            = 7500f,
+            headingDeg       = 045f,
+            vsiFpm           = 100f,
+            displayedVsiFpm  = 95f,
+            slipDeg          = 2f,
+            turnRateDegSec   = 0.5f,
+            rpmEng0          = 2450f,
+            mapInhg          = 24.5f,
+            oilTempDegC      = 98f,
+            oilPressPsi      = 72f,
+            fuelFlowKgSec    = 0.00278f,   // ~10 LPH AVGAS
+            fuelQtyKg        = floatArrayOf(30f, 29f),
+            egtDegC          = floatArrayOf(690f, 695f, 685f, 700f, 688f, 692f),
+            busVolts         = 28.1f,
+            battAmps         = 2f,
+            suctionInhg      = 5.0f,
+        )
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
+
+    // ── G1000 PFD — extreme attitude: pitch 20°, roll 45° (pitch ladder visible) ──
+
+    add(Scenario("10_pfd_extreme_attitude") {
+        val extremeSnap = cruiseSnap.copy(
+            pitchDeg      = 20f,
+            rollDeg       = 45f,
+            vviFpm        = 2800f,
+        )
+        val simData  = MutableStateFlow<SimSnapshot?>(extremeSnap)
+        val renderer = G1000PfdRenderer(assets, simData, insetMap = null, theme = Theme.DAY)
+        renderer.hsiMode  = HsiMode.ARC
+        renderer.baroUnit = BaroUnit.HPA
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
+
+    // ── G1000 PFD — night theme (should look darker than 07_pfd_night) ────────
+
+    add(Scenario("11_pfd_night_extreme") {
+        val extremeSnap = cruiseSnap.copy(
+            pitchDeg   = -5f,
+            rollDeg    = -20f,
+            iasKts     = 160f,
+            vviFpm     = -800f,
+        )
+        val simData  = MutableStateFlow<SimSnapshot?>(extremeSnap)
+        val renderer = G1000PfdRenderer(assets, simData, insetMap = null, theme = Theme.NIGHT)
+        renderer.hsiMode  = HsiMode.FULL_360
+        renderer.baroUnit = BaroUnit.HPA
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
+
+    // ── Steam gauge panel — idle (all values near minimum) ──────────────────
+
+    add(Scenario("12_steam_idle") {
+        val renderer = SteamGaugePanelRenderer(assets, theme = Theme.DAY)
+        renderer.gaugeState = GaugeState(
+            airspeedKts     = 0f,
+            pitchDeg        = 0f,
+            rollDeg         = 0f,
+            altFt           = 0f,
+            headingDeg      = 0f,
+            vsiFpm          = 0f,
+            displayedVsiFpm = 0f,
+            rpmEng0         = 600f,
+            mapInhg         = 14f,
+            oilTempDegC     = 30f,
+            oilPressPsi     = 25f,
+            fuelQtyKg       = floatArrayOf(60f, 60f),
+            egtDegC         = FloatArray(6) { 300f },
+            busVolts        = 28f,
+            suctionInhg     = 4.8f,
+        )
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
+
+    // ── Steam gauge panel — redline (values at limits) ──────────────────────
+
+    add(Scenario("13_steam_redline") {
+        val renderer = SteamGaugePanelRenderer(assets, theme = Theme.DAY)
+        renderer.gaugeState = GaugeState(
+            airspeedKts     = 160f,
+            pitchDeg        = -5f,
+            rollDeg         = 30f,
+            altFt           = 14000f,
+            headingDeg      = 330f,
+            vsiFpm          = 1500f,
+            displayedVsiFpm = 1500f,
+            rpmEng0         = 2700f,
+            mapInhg         = 30f,
+            oilTempDegC     = 120f,
+            oilPressPsi     = 100f,
+            fuelQtyKg       = floatArrayOf(5f, 4f),
+            egtDegC         = floatArrayOf(900f, 920f, 880f, 950f, 870f, 910f),
+            busVolts        = 13.5f,
+            suctionInhg     = 5.2f,
+        )
+        renderer.onSurfaceCreated(gl, eglConf)
+        renderer.onSurfaceChanged(gl, W, H)
+        renderer.onDrawFrame(gl)
+    })
 }

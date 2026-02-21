@@ -1,8 +1,8 @@
 #version 300 es
 // text_glyph.vert — positions a single glyph quad from the font atlas
 
-in vec2 a_position;
-in vec2 a_texcoord;
+layout(location = 0) in vec2 a_position;
+layout(location = 1) in vec2 a_texcoord;
 
 out vec2 v_texcoord;
 

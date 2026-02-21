@@ -79,6 +79,7 @@ object GLES30 {
     val GL_ZERO                   get() = LGL.GL_ZERO
 
     val GL_DEPTH_TEST             get() = LGL.GL_DEPTH_TEST
+    val GL_LEQUAL                 get() = LGL.GL_LEQUAL
     val GL_CULL_FACE              get() = LGL.GL_CULL_FACE
     val GL_SCISSOR_TEST           get() = LGL.GL_SCISSOR_TEST
     val GL_STENCIL_TEST           get() = LGL.GL_STENCIL_TEST
@@ -283,6 +284,7 @@ object GLES30 {
     fun glEnable(cap: Int) = LGL.glEnable(cap)
     fun glDisable(cap: Int) = LGL.glDisable(cap)
     fun glBlendFunc(sfactor: Int, dfactor: Int) = LGL.glBlendFunc(sfactor, dfactor)
+    fun glDepthFunc(func: Int) = LGL.glDepthFunc(func)
     fun glDepthMask(flag: Boolean) = LGL.glDepthMask(flag)
     fun glLineWidth(width: Float) = LGL.glLineWidth(width)
     fun glScissor(x: Int, y: Int, width: Int, height: Int) = LGL.glScissor(x, y, width, height)

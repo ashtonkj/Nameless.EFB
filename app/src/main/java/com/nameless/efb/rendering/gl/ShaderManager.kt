@@ -50,6 +50,21 @@ class ShaderManager(private val assets: AssetManager) {
         }
     }
 
+    /**
+     * Set the `u_theme` uniform on every cached program.
+     * Call once after all programs are compiled (e.g. after [BaseRenderer.onGlReady])
+     * and again whenever the rendering theme changes.
+     */
+    fun setThemeUniform(themeValue: Float) {
+        for (program in programCache.values) {
+            GLES30.glUseProgram(program)
+            val loc = GLES30.glGetUniformLocation(program, "u_theme")
+            if (loc >= 0) {
+                GLES30.glUniform1f(loc, themeValue)
+            }
+        }
+    }
+
     /** Delete all cached programs. Call from the GL thread on teardown. */
     fun release() {
         programCache.values.forEach { GLES30.glDeleteProgram(it) }
